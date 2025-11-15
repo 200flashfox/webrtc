@@ -5,6 +5,7 @@ export default function CameraSelector() {
 
   const [cameras, setCameras] = useState<MediaDeviceInfo[]>([]);
   const [selectedCameraId, setSelectedCameraId] = useState<string>("");
+  const [stream, setStream] = useState<MediaStream | null>(null);
 
   const firstLoadRef = useRef(true);
 
@@ -13,7 +14,7 @@ export default function CameraSelector() {
       video: { deviceId: { exact: deviceId } },
       audio: false,
     });
-
+    setStream(stream);
     if (videoRef.current) {
       videoRef.current.srcObject = stream;
     }
@@ -31,7 +32,7 @@ export default function CameraSelector() {
         const firstCam = videoDevices[0].deviceId;
 
         setSelectedCameraId(firstCam);
-        startCamera(firstCam); // now safe
+        // startCamera(firstCam); // now safe
       }
     };
 
@@ -43,6 +44,13 @@ export default function CameraSelector() {
     setSelectedCameraId(newCam);
     startCamera(newCam);
   };
+
+
+  const stopCamera = () => {
+    stream?.getTracks().forEach((t) => t.stop());
+    setStream(null);
+  };
+
 
   return (
     <div style={{ padding: "20px" }}>
@@ -68,6 +76,13 @@ export default function CameraSelector() {
           style={{ width: "300px", borderRadius: "12px" }}
         />
       </div>
+
+      {!stream ? (
+        <button onClick={()=>startCamera(selectedCameraId)}>Start Camera</button>
+      ) : (
+        <button onClick={stopCamera}>Stop Camera</button>
+      )}
+
     </div>
   );
 }
